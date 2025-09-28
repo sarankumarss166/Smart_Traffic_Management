@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ junction }} Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            font-family: 'Segoe UI', sans-serif;
+            color: #fff;
+            min-height: 100vh;
+        }
+        .dashboard {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+        .status-box {
+            background: rgba(0,0,0,0.6);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .status-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+        .status-lane {
+            font-size: 1.1rem;
+        }
+        .timer {
+            font-size: 1.2rem;
+            margin-top: 10px;
+            color: #ffd700;
+        }
+        .lane-box {
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .btn-custom {
+            margin: 5px 3px;
+            border-radius: 10px;
+        }
+        .video-feed {
+            width: 100%;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <h2 class="text-center mb-4">{{ junction }} – Traffic Dashboard</h2>
+
+        <!-- Status Box -->
+        <div class="status-box">
+            {% if mode == "Emergency" %}
+                <div class="status-title">🚨 Emergency Mode Active</div>
+                <div class="status-lane">Green Lane: <b>{{ current_green }}</b></div>
+            {% elif mode == "Manual" %}
+                <div class="status-title">🛠 Manual Mode Active</div>
+                <div class="status-lane">Green Lane: <b>{{ current_green }}</b></div>
+            {% elif mode == "Stop" %}
+                <div class="status-title">🚦 Signal Off</div>
+                <div class="status-lane">All lights are red</div>
+            {% else %}
+                <div class="status-title">🤖 Auto Mode Active</div>
+                <div class="status-lane">Green Lane: <b>{{ current_green }}</b></div>
+            {% endif %}
+
+            {% if mode != "Manual" and mode != "Stop" %}
+                <div id="timer" class="timer"></div>
+            {% endif %}
+        </div>
+
+        <!-- Control Buttons -->
+        <form method="POST" class="text-center mb-3">
+            <button name="switch_auto" value="1" class="btn btn-success btn-custom">Switch to Auto</button>
+            {% if mode != "Stop" %}
+                <button name="stop_signals" value="1" class="btn btn-danger btn-custom">Stop Signals</button>
+            {% else %}
+                <button name="start_signals" value="1" class="btn btn-primary btn-custom">Start Signals</button>
+            {% endif %}
+        </form>
+
+        <!-- Lane Feeds -->
+        <div class="row">
+            {% for lane in lanes %}
+                <div class="col-md-6">
+                    <div class="lane-box">
+                       <h5>{{ lane|capitalize }} Lane – Count: <span id="count-{{ lane }}">{{ lane_counts[lane] }}</span></h5>
+
+                        <img src="{{ url_for('video', junction=junction, lane=lane) }}" class="video-feed">
+
+                        <form method="POST" class="mt-2">
+                            <button name="force_lane" value="{{ lane }}" class="btn btn-warning btn-sm btn-custom">Force Green</button>
+                            <button name="emergency_lane" value="{{ lane }}" class="btn btn-danger btn-sm btn-custom">Emergency</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('index') }}" class="btn btn-light btn-custom">⬅ Back to Junctions</a>
+        </div>
+    </div>
+
+   <script>
+function fetchState() {
+    fetch("{{ url_for('get_state', junction=junction) }}")
+        .then(response => response.json())
+        .then(data => {
+            // Update counts
+            {% for lane in lanes %}
+            document.getElementById("count-{{ lane }}").textContent = data.lane_counts["{{ lane }}"];
+            {% endfor %}
+
+            // Update mode & current green
+            const statusBox = document.querySelector(".status-box");
+            let mode = data.mode;
+            let currentGreen = data.current_green;
+            let html = "";
+
+            if (mode === "Emergency") {
+                html = `<div class="status-title">🚨 Emergency Mode Active</div>
+                        <div class="status-lane">Green Lane: <b>${currentGreen}</b></div>`;
+            } else if (mode === "Manual") {
+                html = `<div class="status-title">🛠 Manual Mode Active</div>
+                        <div class="status-lane">Green Lane: <b>${currentGreen}</b></div>`;
+            } else if (mode === "Stop") {
+                html = `<div class="status-title">🚦 Signal Off</div>
+                        <div class="status-lane">All lights are red</div>`;
+            } else {
+                html = `<div class="status-title">🤖 Auto Mode Active</div>
+                        <div class="status-lane">Green Lane: <b>${currentGreen}</b></div>`;
+            }
+
+            statusBox.innerHTML = html + `<div id="timer" class="timer"></div>`;
+
+            // Update timer
+            const timerElement = document.getElementById("timer");
+            const now = Math.floor(Date.now() / 1000);
+            const remaining = Math.floor(data.timer_end - now);
+            if (remaining >= 0) {
+                timerElement.textContent = "⏳ Time Remaining: " + remaining + "s";
+            } else {
+                timerElement.textContent = "Switching soon...";
+            }
+        });
+}
+
+// Refresh every second
+setInterval(fetchState, 1000);
+fetchState();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Police Control Room Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    /* Body and background */
+    body {
+        font-family: 'Roboto Slab', serif;
+        margin: 0;
+        min-height: 100vh;  /* ✅ allow scrolling */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    body::before {
+        content: "";
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background: url('https://i.imgur.com/6Yj9v7Y.png') repeat;
+        opacity: 0.03;
+        animation: moveBG 60s linear infinite;
+        z-index: 0;
+    }
+
+    @keyframes moveBG {
+        0% {background-position: 0 0;}
+        100% {background-position: 1000px 1000px;}
+    }
+
+    .login-box {
+        position: relative;
+    background: rgba(255, 255, 255, 0.97);
+    padding: 35px 35px;   /* increased right/left padding */
+    border-radius: 18px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+    width: 360px;
+    margin: 40px 0;
+    text-align: center;
+    z-index: 1;
+    }
+
+    .logo {
+        width: 80px;
+        margin-bottom: 18px;
+        border-radius: 50%;
+        border: 2px solid #0b3d91;
+        background: #fff;
+        padding: 5px;
+    }
+
+    h1 {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        color: #0b3d91;
+        margin-bottom: 8px;
+        text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+        font-size: 22px;
+    }
+
+    h3 {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 400;
+        color: #333;
+        margin-bottom: 18px;
+        font-size: 15px;
+    }
+
+   input[type="email"], 
+input[type="password"], 
+input[type="text"] {
+    width: 100%;
+    padding: 12px 14px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    box-sizing: border-box;   /* ✅ fixes right-side gap issue */
+}
+
+    input:focus {
+        border-color: #0b3d91;
+        box-shadow: 0 0 8px rgba(11, 61, 145, 0.3);
+        outline: none;
+    }
+
+    .captcha-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 12px 0;
+    }
+
+    .captcha-box {
+        background: #e0e0e0;
+        padding: 8px 12px;
+        font-weight: bold;
+        font-size: 16px;
+        border-radius: 8px;
+        letter-spacing: 2px;
+        user-select: none;
+    }
+
+    .refresh-captcha {
+        cursor: pointer;
+        color: #0b3d91;
+        font-weight: bold;
+        margin-left: 8px;
+        transition: transform 0.3s;
+    }
+
+    .refresh-captcha:hover {
+        transform: rotate(20deg);
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(to right, #0b3d91, #1e64c8);
+        border: none;
+        color: #fff;
+        font-size: 16px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 12px;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        background: linear-gradient(to right, #1e64c8, #0b3d91);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+    }
+
+    .error {
+        color: red;
+        margin-bottom: 12px;
+        font-weight: bold;
+        font-size: 13px;
+    }
+
+    footer {
+        margin: 15px 0;
+        text-align: center;
+        color: #fff;
+        font-size: 0.85em;
+        z-index: 2;
+        text-shadow: 0 0 5px rgba(0,0,0,0.7);
+    }
+
+    /* ✅ Camera section */
+    .camera-container {
+        margin-top: 12px;
+    }
+
+    video, #capturedImage {
+        width: 100%;
+        border-radius: 10px;
+        margin-bottom: 8px;
+    }
+
+    #captureBtn, #retakeBtn {
+        width: 100%;
+        background: #1e64c8;
+        font-size: 14px;
+        padding: 10px;
+        margin-bottom: 8px;
+    }
+
+    #retakeBtn {
+        background: #b92b27;
+    }
+
+    @media screen and (max-width: 420px) {
+        .login-box {
+            width: 90%;
+            padding: 25px 18px;
+        }
+    }
+</style>
+</head>
+<body>
+
+<div class="login-box">
+    <img src="{{ url_for('static', filename='images/police_badge.png') }}" alt="Police Badge" class="logo">
+
+    <h1>POLICE CONTROL ROOM</h1>
+    <h3>Login to the Dashboard</h3>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="error">{{ messages[0] }}</div>
+      {% endif %}
+    {% endwith %}
+
+    <form id="loginForm" method="POST" action="{{ url_for('login') }}">
+        <input type="email" name="email" placeholder="Enter your official email" required>
+        <input type="password" name="password" placeholder="Enter password" required>
+
+        <!-- ✅ Camera for face authentication -->
+        <div class="camera-container">
+            <video id="video" autoplay></video>
+            <img id="capturedImage" style="display:none;" />
+            <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+
+            <button type="button" id="captureBtn">Capture Face</button>
+            <button type="button" id="retakeBtn" style="display:none;">Retake</button>
+        </div>
+        <input type="hidden" name="face_image" id="face_image">
+
+        <!-- CAPTCHA -->
+        <div class="captcha-container">
+            <div class="captcha-box" id="captcha">AB12C</div>
+            <div class="refresh-captcha" onclick="generateCaptcha()">&#x21bb;</div>
+        </div>
+        <input type="text" name="captcha_input" placeholder="Enter CAPTCHA" required>
+
+        <button type="submit" id="submitBtn" disabled>Login</button>
+    </form>
+</div>
+
+<footer>
+    &copy; 2025 TraffIQ Titans ❤️
+</footer>
+
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('captureBtn');
+    const retakeBtn = document.getElementById('retakeBtn');
+    const capturedImage = document.getElementById('capturedImage');
+    const faceInput = document.getElementById('face_image');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Start webcam
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => { video.srcObject = stream; })
+        .catch(err => console.error("Camera error:", err));
+
+    // Capture face image
+    captureBtn.addEventListener('click', () => {
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Show captured image
+        capturedImage.src = canvas.toDataURL('image/png');
+        capturedImage.style.display = "block";
+        faceInput.value = capturedImage.src;
+
+        // Hide video and switch buttons
+        video.style.display = "none";
+        captureBtn.style.display = "none";
+        retakeBtn.style.display = "block";
+        submitBtn.disabled = false;
+    });
+
+    // Retake photo
+    retakeBtn.addEventListener('click', () => {
+        capturedImage.style.display = "none";
+        video.style.display = "block";
+        captureBtn.style.display = "block";
+        retakeBtn.style.display = "none";
+        submitBtn.disabled = true;
+    });
+
+    // CAPTCHA
+    function generateCaptcha() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let captcha = '';
+        for(let i=0; i<5; i++) {
+            captcha += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        document.getElementById('captcha').innerText = captcha;
+    }
+    generateCaptcha();
+</script>
+
+</body>
+</html>

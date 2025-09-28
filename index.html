@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Traffic Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Roboto Slab', serif;
+            background: linear-gradient(to right, #74ebd5, #ACB6E5);
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            font-family: 'Pacifico', cursive;
+            font-size: 3em;
+            margin-top: 30px;
+            color: #fff;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 40px;
+            color: #fff;
+        }
+
+        .junction-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 50px 20px;
+        }
+
+        .junction-tile {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            overflow: hidden;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .junction-tile:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+        }
+
+        .junction-tile img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .junction-tile button {
+            width: 90%;
+            margin: 15px 0 25px 0;
+            padding: 15px 0;
+            font-size: 18px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .junction-tile button:hover {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #222;
+            color: #fff;
+            font-size: 0.9em;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+
+        footer a {
+            color: #ff7e5f;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Smart Traffic Management Dashboard</h1>
+    <h2>Select a Junction</h2>
+
+    <div class="junction-grid">
+        <!-- Junction 1 -->
+        <div class="junction-tile">
+            <img src="{{ url_for('static', filename='images/junction1.jpg') }}" alt="Junction 1 Image">
+            <a href="{{ url_for('junction', name='Fun Mall') }}">
+                <button>FUN MALL</button>
+            </a>
+        </div>
+
+        <!-- Junction 2 -->
+        <div class="junction-tile">
+            <img src="{{ url_for('static', filename='images/junction2.jpg') }}" alt="Junction 2 Image">
+            <a href="{{ url_for('junction', name='Peelamedu') }}">
+                <button>PEELAMEDU</button>
+            </a>
+        </div>
+
+        <!-- Junction 3 -->
+        <div class="junction-tile">
+            <img src="{{ url_for('static', filename='images/junction3.jpg') }}" alt="Junction 3 Image">
+            <a href="{{ url_for('junction', name='Gandhipuram') }}">
+                <button>GANDHIPURAM</button>
+            </a>
+        </div>
+
+        <!-- Junction 4 -->
+        <div class="junction-tile">
+            <img src="{{ url_for('static', filename='images/junction4.jpg') }}" alt="Junction 4 Image">
+            <a href="{{ url_for('junction', name='Navaindia') }}">
+                <button>NAVA INDIA</button>
+            </a>
+        </div>
+
+ <!-- Junction 5 -->
+        <div class="junction-tile">
+            <img src="{{ url_for('static', filename='images/junction5.jpg') }}" alt="Junction 4 Image">
+            <a href="{{ url_for('junction', name='Marudhamalai') }}">
+                <button>MARUDHAMALAI</button>
+            </a>
+        </div>
+
+<!-- Junction 6 -->
+        <div class="junction-tile">
+            <img src="{{ url_for('static', filename='images/junction6.jpg') }}" alt="Junction 4 Image">
+            <a href="{{ url_for('junction', name='Avinashi') }}">
+                <button>AVINASHI</button>
+            </a>
+        </div>
+
+
+
+
+        <!-- Add more junctions manually below as needed -->
+    </div>
+
+    <footer>
+        Made with ❤️ by TraffIQ Titans | &copy; 2025 Smart Traffic System
+    </footer>
+
+</body>
+</html>
